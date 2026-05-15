@@ -5,16 +5,16 @@
   ],
   "suggested_versions": [
     {
-      "version": "3.32.0",
-      "label": "Latest available"
+      "version": "3.0.11",
+      "label": "Current in cloud"
     },
     {
       "version": "3.30.1",
       "label": "Verification"
     },
     {
-      "version": "3.0.11",
-      "label": "Current in cloud"
+      "version": "3.32.0",
+      "label": "Latest available"
     }
   ],
   "flags": {
