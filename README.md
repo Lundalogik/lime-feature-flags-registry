@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-05-15 11:29 UTC &nbsp;·&nbsp; 23 flags tracked*
+*Last updated: 2026-05-15 11:41 UTC &nbsp;·&nbsp; 23 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -28,12 +28,12 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `run_automations` | lime-core | — | lime-crm 2.882.0 |
 | `useBowserMenu` | lime-crm-components | — | lime-crm 2.974.0 |
 | `useCustomVisibility` | lime-webclient | — | lime-crm 2.923.0 |
-| `useFeed` | lime-webclient | — | lime-crm 2.1017.3 |
+| `useFeed` | lime-webclient | — | lime-crm 2.1018.0 |
 | `useFileViewer` | lime-webclient | — | lime-crm 2.1117.0 |
 | `useLayouts` | lime-crm-components | lime-crm 2.857.0 | lime-crm 2.1192.0 |
 | `useLimeAdminForEntraID` | lime-webclient | lime-crm 2.898.0 | lime-crm 2.1014.0 |
 | `useLimeSequences` | lime-webclient | — | lime-crm 2.1006.0 |
-| `useMovedTabs` | lime-webclient | — | lime-crm 2.1017.3 |
+| `useMovedTabs` | lime-webclient | — | lime-crm 2.1018.0 |
 | `useNewLayoutResponseStructure` | lime-crm-components | — | lime-crm 2.1184.0 |
 | `useTaskDataTrail` | lime-core | — | lime-crm 2.1142.0 |
 | `use_ai_v1` | lime-core | lime-crm 2.1119.0 | lime-crm 3.26.0 |

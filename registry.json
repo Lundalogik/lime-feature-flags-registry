@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T11:29:31Z",
+  "generated_at": "2026-05-15T11:41:46Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/limepkg-email"
@@ -36,7 +36,7 @@
         "lime_crm": "2.842.0"
       },
       "removed_in": {
-        "lime_crm": "2.1017.3"
+        "lime_crm": "2.1018.0"
       },
       "history": [
         {
@@ -57,21 +57,6 @@
         {
           "event": "removed",
           "lime_crm": "2.1018.0",
-          "source_package": "lime-crm-components"
-        },
-        {
-          "event": "removed",
-          "lime_crm": "2.1017.3",
-          "source_package": "lime-webclient"
-        },
-        {
-          "event": "removed",
-          "lime_crm": "2.1017.3",
-          "source_package": "lime-crm-components"
-        },
-        {
-          "event": "removed",
-          "lime_crm": "2.1017.3",
           "source_package": "lime-crm-components"
         }
       ]
@@ -124,7 +109,7 @@
         "lime_crm": "2.857.0"
       },
       "removed_in": {
-        "lime_crm": "2.1017.3"
+        "lime_crm": "2.1018.0"
       },
       "history": [
         {
@@ -140,16 +125,6 @@
         {
           "event": "removed",
           "lime_crm": "2.1018.0",
-          "source_package": "lime-crm-components"
-        },
-        {
-          "event": "removed",
-          "lime_crm": "2.1017.3",
-          "source_package": "lime-webclient"
-        },
-        {
-          "event": "removed",
-          "lime_crm": "2.1017.3",
           "source_package": "lime-crm-components"
         }
       ]
