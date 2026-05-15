@@ -1,8 +1,7 @@
 {
-  "generated_at": "2026-05-15T12:08:09Z",
+  "generated_at": "2026-05-15T12:39:14Z",
   "sources": [
-    "Lundalogik/lime-crm",
-    "Lundalogik/limepkg-email"
+    "Lundalogik/lime-crm"
   ],
   "flags": {
     "RemovedInMarshmallow4Warning": {
