@@ -298,7 +298,7 @@
     const active = [], future = [], removed = [];
 
     for (const [name, flag] of Object.entries(registry.flags || {})) {
-      const state = getFlagState(flag, limeCrmVer, emailVer);
+      const state = getFlagState(flag, limeCrmVer);
       if      (state.category === 'active')  active.push({ name, flag, state });
       else if (state.category === 'removed') removed.push({ name, flag, state });
       else                                   future.push({ name, flag, state });
