@@ -122,14 +122,12 @@ def classify_event(line: str) -> str | None:
     return None
 
 
-def extract_flag_name(line: str) -> str | None:
-    m = FLAG_BACKTICK_RE.search(line)
-    if m:
-        return m.group(1)
-    m = FLAG_NAMED_RE.search(line)
-    if m:
-        return m.group(1)
-    return None
+def extract_flag_names(line: str) -> list[str]:
+    """Return ALL flag names found in a line (a single line can mention several)."""
+    names = FLAG_BACKTICK_RE.findall(line)
+    if names:
+        return names
+    return FLAG_NAMED_RE.findall(line)
 
 
 def extract_source_package(line: str) -> str | None:
@@ -164,53 +162,63 @@ def parse_changelog_content(
         block = content[block_start:block_end]
 
         for line in block.splitlines():
-            if not FLAG_LINE_RE.search(line):
+            # Path A: line explicitly mentions "feature switch/flag" or
+            #         "feature-switches:" — covers add/remove/default events.
+            # Path B: line has "enable … by default" / "set default true" with
+            #         a flag name — catches default changes that don't use the
+            #         feature-switches scope (e.g. "enable `useFoo` by default").
+            # Path C: line has a flag name + remove keyword without "feature
+            #         switch" text (e.g. "remove useRecentlyDeleted").
+            is_flag_line = FLAG_LINE_RE.search(line)
+            is_default_line = DEFAULT_TRUE_RE.search(line)
+            is_remove_line = REMOVE_RE.search(line)
+
+            if not is_flag_line and not is_default_line and not is_remove_line:
                 continue
 
             event = classify_event(line)
-            flag_name = extract_flag_name(line)
+            flag_names = extract_flag_names(line)
             source_pkg = extract_source_package(line)
 
-            if not flag_name or not event:
+            if not flag_names or not event:
                 continue
 
-            if flag_name not in flags:
-                flags[flag_name] = {
-                    "source_package": source_pkg,
-                    "status": "active",
-                    "current_default": False,
-                    "added_in": {},
-                    "default_true_since": {},
-                    "removed_in": {},
-                    "history": [],
-                }
+            for flag_name in flag_names:
+                if flag_name not in flags:
+                    flags[flag_name] = {
+                        "source_package": source_pkg,
+                        "status": "active",
+                        "current_default": False,
+                        "added_in": {},
+                        "default_true_since": {},
+                        "removed_in": {},
+                        "history": [],
+                    }
 
-            flag = flags[flag_name]
+                flag = flags[flag_name]
 
-            if source_pkg and not flag["source_package"]:
-                flag["source_package"] = source_pkg
+                if source_pkg and not flag["source_package"]:
+                    flag["source_package"] = source_pkg
 
-            entry: dict = {"event": event, version_key: version_str}
-            if source_pkg:
-                entry["source_package"] = source_pkg
-            flag["history"].append(entry)
+                entry: dict = {"event": event, version_key: version_str}
+                if source_pkg:
+                    entry["source_package"] = source_pkg
+                flag["history"].append(entry)
 
-            if event == "added":
-                if not flag["added_in"]:
-                    flag["added_in"] = {version_key: version_str}
-                # Re-activate if it was previously seen as removed
-                # (can happen with duplicate/noisy entries)
-                if flag["status"] != "removed":
+                if event == "added":
+                    if not flag["added_in"]:
+                        flag["added_in"] = {version_key: version_str}
+                    if flag["status"] != "removed":
+                        flag["status"] = "active"
+                elif event == "default_changed_to_true":
+                    flag["current_default"] = True
+                    if not flag["default_true_since"]:
+                        flag["default_true_since"] = {version_key: version_str}
                     flag["status"] = "active"
-            elif event == "default_changed_to_true":
-                flag["current_default"] = True
-                if not flag["default_true_since"]:
-                    flag["default_true_since"] = {version_key: version_str}
-                flag["status"] = "active"
-            elif event == "removed":
-                flag["removed_in"] = {version_key: version_str}
-                flag["status"] = "removed"
-                flag["current_default"] = None
+                elif event == "removed":
+                    flag["removed_in"] = {version_key: version_str}
+                    flag["status"] = "removed"
+                    flag["current_default"] = None
 
 
 def build_registry(token: str | None) -> dict:
