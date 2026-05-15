@@ -1,8 +1,436 @@
 {
-  "generated_at": null,
+  "generated_at": "2026-05-15T11:05:12Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/limepkg-email"
   ],
-  "flags": {}
+  "flags": {
+    "useLayouts": {
+      "source_package": "lime-crm-components",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {
+        "lime_crm": "2.857.0"
+      },
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1192.0"
+      },
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "2.857.0",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "added",
+          "lime_crm": "2.857.0",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1191.0",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1192.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "run_automations": {
+      "source_package": "lime-core",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.882.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.882.0",
+          "source_package": "lime-core"
+        }
+      ]
+    },
+    "useCustomVisibility": {
+      "source_package": "lime-webclient",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.923.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.923.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useNotifications": {
+      "source_package": "lime-crm-building-blocks",
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "2.954.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "2.954.0",
+          "source_package": "lime-crm-building-blocks"
+        }
+      ]
+    },
+    "useBowserMenu": {
+      "source_package": "lime-crm-components",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.974.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.974.0",
+          "source_package": "lime-crm-components"
+        }
+      ]
+    },
+    "useLimeSequences": {
+      "source_package": "lime-webclient",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1006.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1006.0",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1006.0",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1006.0",
+          "source_package": "lime-core"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1006.0",
+          "source_package": "lime-core"
+        }
+      ]
+    },
+    "useLimeAdminForEntraID": {
+      "source_package": "lime-webclient",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1014.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1014.0",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1014.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useFeed": {
+      "source_package": "lime-webclient",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1017.3"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1018.0",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1018.0",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1018.0",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1017.3",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1017.3",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1017.3",
+          "source_package": "lime-crm-components"
+        }
+      ]
+    },
+    "useMovedTabs": {
+      "source_package": "lime-webclient",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1017.3"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1018.0",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1018.0",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1017.3",
+          "source_package": "lime-webclient"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1017.3",
+          "source_package": "lime-crm-components"
+        }
+      ]
+    },
+    "use_label_and_limetype_indexing": {
+      "source_package": "lime-core",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1111.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1111.0",
+          "source_package": "lime-core"
+        }
+      ]
+    },
+    "useOfficeFilePreview": {
+      "source_package": "lime-webclient",
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "2.1116.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "2.1116.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useFileViewer": {
+      "source_package": "lime-webclient",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1117.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1117.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "use_ai_v1": {
+      "source_package": "lime-core",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {
+        "lime_crm": "2.1119.0"
+      },
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "3.26.0"
+      },
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "2.1119.0",
+          "source_package": "lime-core"
+        },
+        {
+          "event": "added",
+          "lime_crm": "2.1123.0",
+          "source_package": "lime-core"
+        },
+        {
+          "event": "added",
+          "lime_crm": "2.1124.0",
+          "source_package": "lime-core"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "3.26.0",
+          "source_package": "lime-core"
+        }
+      ]
+    },
+    "useShowThumbnail": {
+      "source_package": "lime-webclient",
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "2.1119.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "2.1119.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useCreateCoworkerAfterUser": {
+      "source_package": "lime-webclient",
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "2.1131.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "2.1131.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useTaskDataTrail": {
+      "source_package": "lime-core",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1142.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1142.0",
+          "source_package": "lime-core"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1142.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useNewLayoutResponseStructure": {
+      "source_package": "lime-crm-components",
+      "status": "removed",
+      "current_default": null,
+      "added_in": {},
+      "default_true_since": {},
+      "removed_in": {
+        "lime_crm": "2.1184.0"
+      },
+      "history": [
+        {
+          "event": "removed",
+          "lime_crm": "2.1184.0",
+          "source_package": "lime-crm-components"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "2.1184.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "limepkgEmailEnableMessageIdIdentification": {
+      "source_package": "lime-webclient",
+      "status": "active",
+      "current_default": true,
+      "added_in": {},
+      "default_true_since": {
+        "lime_crm": "2.1216.0"
+      },
+      "removed_in": {},
+      "history": [
+        {
+          "event": "default_changed_to_true",
+          "lime_crm": "2.1216.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "usePublishFilterSet": {
+      "source_package": "lime-webclient",
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "3.31.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "3.31.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    }
+  }
 }
