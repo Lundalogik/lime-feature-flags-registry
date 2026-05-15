@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lime Feature Flags Registry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 24px;
+      color: #222;
+      background: #fff;
+    }
+
+    h1 { font-size: 1.6rem; margin-bottom: 4px; }
+    h2 { font-size: 1.15rem; margin: 28px 0 10px; border-bottom: 2px solid #eee; padding-bottom: 6px; }
+    h3 { font-size: 1rem; margin: 20px 0 8px; color: #444; }
+
+    .meta { color: #888; font-size: 0.85rem; margin-bottom: 24px; }
+
+    /* ── Lookup card ── */
+    .lookup {
+      background: #f7f7f9;
+      border: 1px solid #e0e0e8;
+      border-radius: 10px;
+      padding: 20px 24px 24px;
+      margin-bottom: 28px;
+    }
+    .lookup p { margin: 0 0 16px; font-size: 0.95rem; color: #555; }
+    .input-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
+    .input-group { display: flex; flex-direction: column; gap: 4px; }
+    .input-group label { font-size: 0.85rem; font-weight: 600; color: #333; }
+    .input-group small { font-size: 0.78rem; color: #888; }
+    .input-group input {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      width: 200px;
+      outline: none;
+    }
+    .input-group input:focus { border-color: #00704a; box-shadow: 0 0 0 2px #00704a22; }
+    .btn {
+      background: #00704a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 9px 22px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:hover { background: #005c3b; }
+    .btn-clear {
+      background: none;
+      color: #888;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 9px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .btn-clear:hover { background: #f0f0f0; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin-bottom: 4px;
+    }
+    th {
+      background: #1a1a2e;
+      color: #fff;
+      text-align: left;
+      padding: 9px 14px;
+      font-weight: 600;
+    }
+    td { padding: 8px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    tbody tr:nth-child(even) td { background: #fafeff; }
+    tbody tr:nth-child(even):hover td { background: #f0fbf8; }
+
+    code {
+      background: #eef;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.82em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 0.78em;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .badge-false  { background: #fff3cd; color: #7a5c00; }
+    .badge-true   { background: #d4edda; color: #155724; }
+    .badge-removed { background: #f8d7da; color: #721c24; }
+    .badge-future  { background: #e9ecef; color: #495057; }
+
+    /* ── Section summaries ── */
+    .section-summary {
+      font-size: 0.85rem;
+      color: #666;
+      margin: 4px 0 10px;
+    }
+
+    .empty-msg { color: #aaa; font-style: italic; font-size: 0.9rem; padding: 12px 0; }
+
+    /* ── Tabs for full list ── */
+    .tab-bar { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid #eee; }
+    .tab {
+      padding: 8px 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #666;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 600;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .tab.active { color: #00704a; border-bottom-color: #00704a; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Search ── */
+    .search-row { display: flex; gap: 10px; margin: 10px 0 14px; }
+    .search-row input {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 0.9rem;
+      width: 260px;
+      outline: none;
+    }
+    .search-row input:focus { border-color: #00704a; box-shadow: 0 0 0 2px #00704a22; }
+  </style>
+</head>
+<body>
+
+<h1>🚩 Lime Feature Flags Registry</h1>
+<p class="meta" id="meta">Loading registry…</p>
+
+<!-- ── Version Lookup ── -->
+<div class="lookup">
+  <p>Enter your installed versions to see the exact state of every feature flag.</p>
+  <div class="input-row">
+    <div class="input-group">
+      <label for="lime-crm-ver">Lime CRM version</label>
+      <input type="text" id="lime-crm-ver" placeholder="e.g. 3.29.0" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label for="email-ver">limepkg-email version <small>(optional)</small></label>
+      <input type="text" id="email-ver" placeholder="e.g. 2.4.0" autocomplete="off">
+    </div>
+    <button class="btn" onclick="lookup()">Show flags</button>
+    <button class="btn-clear" onclick="clearResults()">Clear</button>
+  </div>
+</div>
+
+<div id="results"></div>
+
+<!-- ── Full registry ── -->
+<h2>All flags</h2>
+<div class="search-row">
+  <input type="text" id="search" placeholder="Search flag name or package…" oninput="renderAll()" autocomplete="off">
+</div>
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('active', this)">Active</button>
+  <button class="tab" onclick="switchTab('removed', this)">Removed</button>
+</div>
+<div id="tab-active" class="tab-panel active"></div>
+<div id="tab-removed" class="tab-panel"></div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let registry = null;
+
+  // ── Bootstrap ─────────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      const resp = await fetch('registry.json');
+      if (!resp.ok) throw new Error(resp.statusText);
+      registry = await resp.json();
+      const ts = registry.generated_at
+        ? new Date(registry.generated_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+        : 'unknown';
+      const count = Object.keys(registry.flags || {}).length;
+      document.getElementById('meta').textContent =
+        `Last updated: ${ts}  ·  ${count} flags tracked`;
+      renderAll();
+    } catch (e) {
+      document.getElementById('meta').textContent = `Failed to load registry.json: ${e.message}`;
+    }
+  }
+
+  // ── Semantic version helpers ───────────────────────────────────────────────
+  function parseSemver(v) {
+    const m = String(v || '').trim().replace(/^v/, '').match(/^(\d+)\.(\d+)\.(\d+)/);
+    return m ? [+m[1], +m[2], +m[3]] : null;
+  }
+
+  function semverLte(a, b) {
+    const pa = parseSemver(a), pb = parseSemver(b);
+    if (!pa || !pb) return false;
+    for (let i = 0; i < 3; i++) {
+      if (pa[i] < pb[i]) return true;
+      if (pa[i] > pb[i]) return false;
+    }
+    return true;
+  }
+
+  // ── Determine flag state at given versions ─────────────────────────────────
+  function getFlagState(flag, limeCrmVer, emailVer) {
+    // Walk history in publication order and apply events within range
+    let state = { category: 'future', defaultValue: false, addedIn: null, removedIn: null };
+
+    for (const entry of (flag.history || [])) {
+      const entryCrm   = entry.lime_crm;
+      const entryEmail = entry.limepkg_email;
+
+      let inRange = false;
+      if (entryCrm && limeCrmVer)   inRange = semverLte(entryCrm, limeCrmVer);
+      if (entryEmail && emailVer)   inRange = inRange || semverLte(entryEmail, emailVer);
+      if (!inRange) continue;
+
+      if (entry.event === 'added') {
+        state.category = 'active';
+        state.defaultValue = false;
+        state.addedIn = entryCrm || entryEmail;
+      } else if (entry.event === 'default_changed_to_true') {
+        state.category = 'active';
+        state.defaultValue = true;
+      } else if (entry.event === 'removed') {
+        state.category = 'removed';
+        state.removedIn = entryCrm || entryEmail;
+      }
+    }
+    return state;
+  }
+
+  // ── Lookup ─────────────────────────────────────────────────────────────────
+  function lookup() {
+    if (!registry) return;
+
+    const limeCrmVer = document.getElementById('lime-crm-ver').value.trim();
+    const emailVer   = document.getElementById('email-ver').value.trim();
+
+    if (!limeCrmVer && !emailVer) {
+      document.getElementById('results').innerHTML =
+        '<p style="color:#c00;font-size:.9rem">Please enter at least one version number.</p>';
+      return;
+    }
+
+    const active = [], future = [], removed = [];
+
+    for (const [name, flag] of Object.entries(registry.flags || {})) {
+      const state = getFlagState(flag, limeCrmVer, emailVer);
+      if      (state.category === 'active')  active.push({ name, flag, state });
+      else if (state.category === 'removed') removed.push({ name, flag, state });
+      else                                   future.push({ name, flag, state });
+    }
+
+    let html = '<h2>Results for your version</h2>';
+
+    // Active
+    html += `<h3>✅ Active flags in your installation (${active.length})</h3>`;
+    if (active.length === 0) {
+      html += '<p class="empty-msg">No active flags found for this version.</p>';
+    } else {
+      html += '<p class="section-summary">These flags exist and can be configured. The default column shows the out-of-the-box value.</p>';
+      html += buildTable(active, ['name', 'source_package', 'default', 'added_in']);
+    }
+
+    // Not yet available
+    if (future.length > 0) {
+      html += `<h3>⏳ Not yet in your version — added later (${future.length})</h3>`;
+      html += '<p class="section-summary">These flags were introduced in a newer release. You cannot set them yet.</p>';
+      html += buildTable(future, ['name', 'source_package', 'added_in']);
+    }
+
+    // Removed
+    if (removed.length > 0) {
+      html += `<h3>🗑️ Removed flags — feature is always on (${removed.length})</h3>`;
+      html += '<p class="section-summary">These flags no longer exist in your version. The feature is permanently enabled; any config entry for them is ignored.</p>';
+      html += buildTable(removed, ['name', 'source_package', 'removed_in']);
+    }
+
+    document.getElementById('results').innerHTML = html;
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function clearResults() {
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('lime-crm-ver').value = '';
+    document.getElementById('email-ver').value = '';
+  }
+
+  // ── Table builder ──────────────────────────────────────────────────────────
+  const COL_HEADERS = {
+    name:           'Flag',
+    source_package: 'Package',
+    default:        'Default',
+    added_in:       'Added in',
+    removed_in:     'Removed in',
+  };
+
+  function buildTable(items, cols) {
+    let html = '<table><thead><tr>'
+      + cols.map(c => `<th>${COL_HEADERS[c] || c}</th>`).join('')
+      + '</tr></thead><tbody>';
+
+    for (const { name, flag, state } of items) {
+      html += '<tr>';
+      for (const col of cols) {
+        if (col === 'name') {
+          html += `<td><code>${esc(name)}</code></td>`;
+        } else if (col === 'default') {
+          const val = state.defaultValue;
+          html += `<td><span class="badge badge-${val}">${val}</span></td>`;
+        } else if (col === 'added_in') {
+          html += `<td>${verDisplay(flag.added_in)}</td>`;
+        } else if (col === 'removed_in') {
+          html += `<td>${verDisplay(flag.removed_in)}</td>`;
+        } else {
+          html += `<td>${esc(flag[col] || '—')}</td>`;
+        }
+      }
+      html += '</tr>';
+    }
+    return html + '</tbody></table>';
+  }
+
+  // ── Full registry rendering ────────────────────────────────────────────────
+  function renderAll() {
+    if (!registry) return;
+    const q = (document.getElementById('search').value || '').toLowerCase();
+    const flags = Object.entries(registry.flags || {});
+
+    const active  = flags.filter(([n, f]) => f.status === 'active'  && matches(n, f, q));
+    const removed = flags.filter(([n, f]) => f.status === 'removed' && matches(n, f, q));
+
+    document.getElementById('tab-active').innerHTML  = renderFullTable(active,  ['name', 'source_package', 'default_col', 'added_in', 'default_true_since']);
+    document.getElementById('tab-removed').innerHTML = renderFullTable(removed, ['name', 'source_package', 'added_in', 'removed_in']);
+  }
+
+  function matches(name, flag, q) {
+    if (!q) return true;
+    return name.toLowerCase().includes(q)
+      || (flag.source_package || '').toLowerCase().includes(q);
+  }
+
+  function renderFullTable(items, cols) {
+    if (items.length === 0) return '<p class="empty-msg">No results.</p>';
+
+    const FULL_HEADERS = {
+      name:               'Flag',
+      source_package:     'Package',
+      default_col:        'Default',
+      added_in:           'Added in',
+      default_true_since: 'Default → true in',
+      removed_in:         'Removed in',
+    };
+
+    let html = '<table><thead><tr>'
+      + cols.map(c => `<th>${FULL_HEADERS[c]}</th>`).join('')
+      + '</tr></thead><tbody>';
+
+    for (const [name, flag] of items.sort(([a], [b]) => a.localeCompare(b))) {
+      html += '<tr>';
+      for (const col of cols) {
+        if (col === 'name') {
+          html += `<td><code>${esc(name)}</code></td>`;
+        } else if (col === 'default_col') {
+          const val = !!flag.current_default;
+          html += `<td><span class="badge badge-${val}">${val}</span></td>`;
+        } else if (col === 'added_in' || col === 'default_true_since' || col === 'removed_in') {
+          html += `<td>${verDisplay(flag[col])}</td>`;
+        } else {
+          html += `<td>${esc(flag[col] || '—')}</td>`;
+        }
+      }
+      html += '</tr>';
+    }
+    return html + '</tbody></table>';
+  }
+
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+  }
+
+  // ── Utilities ──────────────────────────────────────────────────────────────
+  function verDisplay(versionDict) {
+    if (!versionDict || Object.keys(versionDict).length === 0) return '—';
+    return Object.entries(versionDict)
+      .map(([k, v]) => `${k.replace(/_/g, '-')} ${esc(v)}`)
+      .join(', ');
+  }
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // ── Keyboard shortcut (Enter triggers lookup) ──────────────────────────────
+  ['lime-crm-ver', 'email-ver'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') lookup();
+    });
+  });
+
+  init();
+</script>
+</body>
+</html>

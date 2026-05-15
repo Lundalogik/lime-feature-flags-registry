@@ -1,0 +1,45 @@
+name: Refresh Feature Flags Registry
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # midnight UTC, nightly
+  workflow_dispatch:       # manual trigger available in GitHub UI
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write      # needed to commit registry.json and README.md
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Fetch releases and parse feature flags
+        env:
+          # READ_TOKEN must be a fine-grained PAT with read-only access to:
+          #   - Lundalogik/lime-crm
+          #   - Lundalogik/limepkg-email
+          # If those repos are public, GITHUB_TOKEN (auto-provided) is enough.
+          READ_TOKEN: ${{ secrets.READ_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/fetch_and_parse.py
+
+      - name: Commit updated registry
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add registry.json README.md
+          # Only commit when there are actual changes
+          git diff --cached --quiet \
+            && echo "Registry is already up to date." \
+            || git commit -m "chore: refresh feature flags registry $(date +%Y-%m-%d) [skip ci]"
+
+      - name: Push
+        run: git push
