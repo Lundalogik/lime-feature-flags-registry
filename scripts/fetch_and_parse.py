@@ -37,9 +37,11 @@ README_FILE = "README.md"
 
 # ── Regex patterns ───────────────────────────────────────────────────────────
 
-# Lines that mention a feature flag or switch
+# Lines that mention a feature flag or switch.
+# Covers both natural language ("feature switch foo") and the conventional
+# commit scope format ("**feature-switches:** add `foo`").
 FLAG_LINE_RE = re.compile(
-    r"feature\s*(?:flag|switch)|featureswitch",
+    r"feature[-\s]?switches?|feature\s*(?:flag|switch)|featureswitch",
     re.IGNORECASE,
 )
 
@@ -90,12 +92,20 @@ def github_get_all(path: str, token: str | None) -> list:
 # ── Parsing helpers ──────────────────────────────────────────────────────────
 
 
+FEATURE_SWITCHES_SCOPE_RE = re.compile(r"feature-switches?:", re.IGNORECASE)
+
+
 def classify_event(line: str) -> str | None:
     if REMOVE_RE.search(line):
         return "removed"
     if DEFAULT_TRUE_RE.search(line):
         return "default_changed_to_true"
     if ADD_RE.search(line):
+        return "added"
+    # "**feature-switches:** useFoo" — no verb, but the scope itself implies
+    # this is a new flag being introduced (if it were a removal the word
+    # "remove" would be present, caught above).
+    if FEATURE_SWITCHES_SCOPE_RE.search(line):
         return "added"
     return None
 
