@@ -31,6 +31,12 @@ SOURCE_REPOS = [
 REGISTRY_FILE = "registry.json"
 README_FILE = "README.md"
 
+VERSIONS_URL = (
+    "https://integrations-4.internal-engineering.limecrm.cloud"
+    "/webhook/28035ef9-5654-4165-b284-77ab7ad6d1d3"
+)
+VERSIONS_PACKAGE = "lime-crm"
+
 # ── Regex patterns ───────────────────────────────────────────────────────────
 
 # Version header in CHANGELOG.md:
@@ -214,6 +220,64 @@ def parse_changelog_content(
                     flag["current_default"] = None
 
 
+def fetch_suggested_versions() -> list[dict]:
+    """
+    Fetch lime-crm deployment versions (Current in cloud, Verification,
+    Latest available) from the internal versions page.
+    Returns a list like [{"version": "3.32.0", "label": "Latest available"}, …]
+    ordered newest → oldest.
+    """
+    from bs4 import BeautifulSoup
+
+    try:
+        resp = requests.get(VERSIONS_URL, timeout=15)
+        resp.raise_for_status()
+    except Exception as exc:
+        print(f"  Warning: could not fetch versions page: {exc}", file=sys.stderr)
+        return []
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    # Find the header row to determine column indices
+    header_row = soup.find("tr")
+    if not header_row:
+        print("  Warning: no table rows found on versions page.", file=sys.stderr)
+        return []
+
+    headers = [th.get_text(strip=True).lower() for th in header_row.find_all(["th", "td"])]
+    col_map = {}
+    for label, keywords in {
+        "Current in cloud": ["current in cloud", "current"],
+        "Verification":     ["verification"],
+        "Latest available": ["latest available", "latest"],
+    }.items():
+        for i, h in enumerate(headers):
+            if any(k in h for k in keywords):
+                col_map[label] = i
+                break
+
+    # Find the lime-crm row
+    for row in soup.find_all("tr")[1:]:
+        cells = row.find_all(["td", "th"])
+        if not cells:
+            continue
+        if VERSIONS_PACKAGE not in cells[0].get_text(strip=True).lower():
+            continue
+
+        suggestions = []
+        for label in ("Latest available", "Verification", "Current in cloud"):
+            idx = col_map.get(label)
+            if idx is not None and idx < len(cells):
+                ver = cells[idx].get_text(strip=True)
+                if ver and ver != "—" and ver != "-":
+                    suggestions.append({"version": ver, "label": label})
+        print(f"  Deployment versions: {suggestions}")
+        return suggestions
+
+    print(f"  Warning: '{VERSIONS_PACKAGE}' row not found on versions page.", file=sys.stderr)
+    return []
+
+
 def build_registry(token: str | None) -> dict:
     flags: dict = {}
     for source in SOURCE_REPOS:
@@ -237,10 +301,11 @@ def build_registry(token: str | None) -> dict:
 # ── Output generators ────────────────────────────────────────────────────────
 
 
-def build_registry_json(flags: dict) -> dict:
+def build_registry_json(flags: dict, suggested_versions: list[dict]) -> dict:
     return {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sources": [s["repo"] for s in SOURCE_REPOS],
+        "suggested_versions": suggested_versions,
         "flags": flags,
     }
 
@@ -312,7 +377,10 @@ def main() -> None:
 
     flags = build_registry(token)
 
-    registry = build_registry_json(flags)
+    print("Fetching deployment versions…")
+    suggested_versions = fetch_suggested_versions()
+
+    registry = build_registry_json(flags, suggested_versions)
     with open(REGISTRY_FILE, "w") as fh:
         json.dump(registry, fh, indent=2)
     print(f"Wrote {REGISTRY_FILE} ({len(flags)} flags)")

@@ -160,7 +160,8 @@
   <div class="input-row">
     <div class="input-group">
       <label for="lime-crm-ver">Lime CRM version</label>
-      <input type="text" id="lime-crm-ver" placeholder="e.g. 3.29.0" autocomplete="off">
+      <input type="text" id="lime-crm-ver" placeholder="e.g. 3.29.0" list="version-suggestions" autocomplete="off">
+      <datalist id="version-suggestions"></datalist>
     </div>
     <button class="btn" onclick="lookup()">Show flags</button>
     <button class="btn-clear" onclick="clearResults()">Clear</button>
@@ -197,10 +198,19 @@
       const count = Object.keys(registry.flags || {}).length;
       document.getElementById('meta').textContent =
         `Last updated: ${ts}  ·  ${count} flags tracked`;
+      populateSuggestions(registry.suggested_versions || []);
       renderAll();
     } catch (e) {
       document.getElementById('meta').textContent = `Failed to load registry.json: ${e.message}`;
     }
+  }
+
+  // ── Suggested versions (from deployment page) ─────────────────────────────
+  function populateSuggestions(suggestions) {
+    const dl = document.getElementById('version-suggestions');
+    dl.innerHTML = suggestions
+      .map(s => `<option value="${esc(s.version)}">${esc(s.version)} — ${esc(s.label)}</option>`)
+      .join('');
   }
 
   // ── Semantic version helpers ───────────────────────────────────────────────
