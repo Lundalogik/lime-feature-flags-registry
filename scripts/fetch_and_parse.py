@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Fetch GitHub release notes for configured source repos and parse feature flag
-events. Outputs registry.json and README.md.
+Fetch CHANGELOG.md for each configured source repo via the GitHub API and
+parse feature flag events. Outputs registry.json and README.md.
 
 Authentication: set READ_TOKEN (preferred) or GITHUB_TOKEN in the environment.
 For public repos no token is required, but you will hit rate limits quickly
@@ -15,7 +15,6 @@ import sys
 from datetime import datetime, timezone
 
 import requests
-from packaging.version import Version, InvalidVersion
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
@@ -24,11 +23,15 @@ SOURCE_REPOS = [
         "repo": "Lundalogik/lime-crm",
         "version_key": "lime_crm",
         "label": "Lime CRM",
+        "changelog_path": "CHANGELOG.md",
+        "changelog_branch": "main",
     },
     {
         "repo": "Lundalogik/limepkg-email",
         "version_key": "limepkg_email",
         "label": "limepkg-email",
+        "changelog_path": "CHANGELOG.md",
+        "changelog_branch": "main",
     },
 ]
 
@@ -36,6 +39,11 @@ REGISTRY_FILE = "registry.json"
 README_FILE = "README.md"
 
 # ── Regex patterns ───────────────────────────────────────────────────────────
+
+# Version header in CHANGELOG.md:
+#   ## [3.32.0](https://...) (2026-05-14)   ← semantic-release format
+#   ## [3.32.0] - 2026-05-14                ← keep-a-changelog format
+VERSION_HEADER_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.MULTILINE)
 
 # Lines that mention a feature flag or switch.
 # Covers both natural language ("feature switch foo") and the conventional
@@ -55,8 +63,9 @@ FLAG_NAMED_RE = re.compile(
 # Source package from a GitHub commit URL on the same line
 SOURCE_PKG_RE = re.compile(r"github\.com/[^/]+/([^/]+)/commit/")
 
-# Event classification
+# Event classification — ordered from most to least specific
 REMOVE_RE = re.compile(r"\b(remov|delet|drop|retir)\w*\b", re.IGNORECASE)
+# "enable … by default" but NOT "enable in examples" / "enable in tests"
 DEFAULT_TRUE_RE = re.compile(
     r"(enable\w*\s+.*\bby\s+default"
     r"|flip\s+feature"
@@ -65,34 +74,38 @@ DEFAULT_TRUE_RE = re.compile(
     re.IGNORECASE,
 )
 ADD_RE = re.compile(r"\b(add|introduc|implement|creat|new)\w*\b", re.IGNORECASE)
+FEATURE_SWITCHES_SCOPE_RE = re.compile(r"feature-switches?:", re.IGNORECASE)
 
-# ── GitHub API helper ────────────────────────────────────────────────────────
+# ── GitHub API helpers ────────────────────────────────────────────────────────
 
 
-def github_get_all(path: str, token: str | None) -> list:
-    """Fetch all pages from a GitHub API list endpoint."""
-    headers = {"Accept": "application/vnd.github+json"}
+def _auth_headers(token: str | None) -> dict:
+    headers = {"Accept": "application/vnd.github.raw+json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    return headers
 
-    results: list = []
-    url = f"https://api.github.com/{path.lstrip('/')}"
-    while url:
-        resp = requests.get(url, headers=headers, params={"per_page": 100}, timeout=30)
+
+def fetch_changelog(
+    repo_slug: str, path: str, branch: str, token: str | None
+) -> str | None:
+    """Return the raw text of a CHANGELOG.md from GitHub, or None on error."""
+    url = f"https://api.github.com/repos/{repo_slug}/contents/{path}"
+    try:
+        resp = requests.get(
+            url,
+            headers=_auth_headers(token),
+            params={"ref": branch},
+            timeout=30,
+        )
         resp.raise_for_status()
-        data = resp.json()
-        if isinstance(data, list):
-            results.extend(data)
-        else:
-            return [data]
-        url = (resp.links.get("next") or {}).get("url")
-    return results
+        return resp.text
+    except requests.HTTPError as exc:
+        print(f"  Warning: could not fetch {path} from {repo_slug}: {exc}", file=sys.stderr)
+        return None
 
 
-# ── Parsing helpers ──────────────────────────────────────────────────────────
-
-
-FEATURE_SWITCHES_SCOPE_RE = re.compile(r"feature-switches?:", re.IGNORECASE)
+# ── Parsing helpers ───────────────────────────────────────────────────────────
 
 
 def classify_event(line: str) -> str | None:
@@ -102,9 +115,8 @@ def classify_event(line: str) -> str | None:
         return "default_changed_to_true"
     if ADD_RE.search(line):
         return "added"
-    # "**feature-switches:** useFoo" — no verb, but the scope itself implies
-    # this is a new flag being introduced (if it were a removal the word
-    # "remove" would be present, caught above).
+    # "**feature-switches:** useFoo" with no verb → infer "added"
+    # (removals always contain "remove", caught above)
     if FEATURE_SWITCHES_SCOPE_RE.search(line):
         return "added"
     return None
@@ -125,79 +137,80 @@ def extract_source_package(line: str) -> str | None:
     return m.group(1) if m else None
 
 
-def safe_version(v: str) -> Version | None:
-    try:
-        return Version(v.lstrip("v"))
-    except InvalidVersion:
-        return None
-
-
 # ── Core logic ───────────────────────────────────────────────────────────────
 
 
-def fetch_releases(repo_slug: str, token: str | None) -> list[dict]:
-    """Return published (non-draft, non-prerelease) releases, oldest first."""
-    releases = github_get_all(f"repos/{repo_slug}/releases", token)
-    releases = [r for r in releases if not r.get("draft") and not r.get("prerelease")]
-    releases.sort(key=lambda r: r.get("published_at", ""))
-    return releases
-
-
-def parse_release_body(
-    body: str,
-    version_str: str,
-    version_key: str,
-    flags: dict,
+def parse_changelog_content(
+    content: str, version_key: str, flags: dict
 ) -> None:
-    """Scan one release body for feature flag events; update flags in-place."""
-    if not body:
+    """
+    Split a CHANGELOG.md into per-version blocks (newest first) and scan each
+    block for feature flag events. Updates flags in-place.
+    """
+    # Find all version headers and their positions
+    version_matches = list(VERSION_HEADER_RE.finditer(content))
+    if not version_matches:
+        print("  Warning: no version headers found in changelog.", file=sys.stderr)
         return
 
-    for line in body.splitlines():
-        if not FLAG_LINE_RE.search(line):
-            continue
+    # Reverse so we process oldest → newest (important for correct history order)
+    version_matches = list(reversed(version_matches))
 
-        event = classify_event(line)
-        flag_name = extract_flag_name(line)
-        source_pkg = extract_source_package(line)
+    for i, match in enumerate(version_matches):
+        version_str = match.group(1)
+        block_start = match.start()
+        # The block ends where the next (newer) version starts
+        block_end = version_matches[i - 1].start() if i > 0 else len(content)
+        block = content[block_start:block_end]
 
-        if not flag_name or not event:
-            continue
+        for line in block.splitlines():
+            if not FLAG_LINE_RE.search(line):
+                continue
 
-        if flag_name not in flags:
-            flags[flag_name] = {
-                "source_package": source_pkg,
-                "status": "active",
-                "current_default": False,
-                "added_in": {},
-                "default_true_since": {},
-                "removed_in": {},
-                "history": [],
-            }
+            event = classify_event(line)
+            flag_name = extract_flag_name(line)
+            source_pkg = extract_source_package(line)
 
-        flag = flags[flag_name]
+            if not flag_name or not event:
+                continue
 
-        if source_pkg and not flag["source_package"]:
-            flag["source_package"] = source_pkg
+            if flag_name not in flags:
+                flags[flag_name] = {
+                    "source_package": source_pkg,
+                    "status": "active",
+                    "current_default": False,
+                    "added_in": {},
+                    "default_true_since": {},
+                    "removed_in": {},
+                    "history": [],
+                }
 
-        entry: dict = {"event": event, version_key: version_str}
-        if source_pkg:
-            entry["source_package"] = source_pkg
-        flag["history"].append(entry)
+            flag = flags[flag_name]
 
-        if event == "added":
-            if not flag["added_in"]:
-                flag["added_in"] = {version_key: version_str}
-            flag["status"] = "active"
-        elif event == "default_changed_to_true":
-            flag["current_default"] = True
-            if not flag["default_true_since"]:
-                flag["default_true_since"] = {version_key: version_str}
-            flag["status"] = "active"
-        elif event == "removed":
-            flag["removed_in"] = {version_key: version_str}
-            flag["status"] = "removed"
-            flag["current_default"] = None
+            if source_pkg and not flag["source_package"]:
+                flag["source_package"] = source_pkg
+
+            entry: dict = {"event": event, version_key: version_str}
+            if source_pkg:
+                entry["source_package"] = source_pkg
+            flag["history"].append(entry)
+
+            if event == "added":
+                if not flag["added_in"]:
+                    flag["added_in"] = {version_key: version_str}
+                # Re-activate if it was previously seen as removed
+                # (can happen with duplicate/noisy entries)
+                if flag["status"] != "removed":
+                    flag["status"] = "active"
+            elif event == "default_changed_to_true":
+                flag["current_default"] = True
+                if not flag["default_true_since"]:
+                    flag["default_true_since"] = {version_key: version_str}
+                flag["status"] = "active"
+            elif event == "removed":
+                flag["removed_in"] = {version_key: version_str}
+                flag["status"] = "removed"
+                flag["current_default"] = None
 
 
 def build_registry(token: str | None) -> dict:
@@ -205,21 +218,18 @@ def build_registry(token: str | None) -> dict:
     for source in SOURCE_REPOS:
         repo_slug = source["repo"]
         version_key = source["version_key"]
-        print(f"Fetching releases for {repo_slug}…")
-        try:
-            releases = fetch_releases(repo_slug, token)
-        except requests.HTTPError as exc:
-            print(f"  Warning: {exc}", file=sys.stderr)
+        print(f"Fetching CHANGELOG.md from {repo_slug}…")
+        content = fetch_changelog(
+            repo_slug,
+            source["changelog_path"],
+            source["changelog_branch"],
+            token,
+        )
+        if content is None:
             continue
-        print(f"  {len(releases)} releases found")
-        for release in releases:
-            version_str = release["tag_name"].lstrip("v")
-            parse_release_body(
-                release.get("body") or "",
-                version_str,
-                version_key,
-                flags,
-            )
+        print(f"  Parsing {len(content):,} characters…")
+        parse_changelog_content(content, version_key, flags)
+        print(f"  Done — {len(flags)} flags total so far")
     return flags
 
 
