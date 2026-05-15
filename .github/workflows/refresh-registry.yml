@@ -42,4 +42,4 @@ jobs:
             || git commit -m "chore: refresh feature flags registry $(date +%Y-%m-%d) [skip ci]"
 
       - name: Push
-        run: git push
+        run: git pull --rebase && git push
