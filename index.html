@@ -158,10 +158,15 @@
 <div class="lookup">
   <p>Enter your installed versions to see the exact state of every feature flag.</p>
   <div class="input-row">
-    <div class="input-group">
+    <div class="input-group" style="position:relative">
       <label for="lime-crm-ver">Lime CRM version</label>
-      <input type="text" id="lime-crm-ver" placeholder="e.g. 3.29.0" list="version-suggestions" autocomplete="off">
-      <datalist id="version-suggestions"></datalist>
+      <input type="text" id="lime-crm-ver" placeholder="e.g. 3.29.0" autocomplete="off">
+      <div id="version-dropdown" style="
+        display:none; position:absolute; top:100%; left:0; z-index:100;
+        background:#fff; border:1px solid #ccc; border-radius:6px;
+        box-shadow:0 4px 12px rgba(0,0,0,.12); min-width:260px; margin-top:4px;
+        overflow:hidden;
+      "></div>
     </div>
     <button class="btn" onclick="lookup()">Show flags</button>
     <button class="btn-clear" onclick="clearResults()">Clear</button>
@@ -207,10 +212,30 @@
 
   // ── Suggested versions (from deployment page) ─────────────────────────────
   function populateSuggestions(suggestions) {
-    const dl = document.getElementById('version-suggestions');
-    dl.innerHTML = suggestions
-      .map(s => `<option value="${esc(s.version)}">${esc(s.version)} — ${esc(s.label)}</option>`)
-      .join('');
+    if (!suggestions.length) return;
+    const input = document.getElementById('lime-crm-ver');
+    const dropdown = document.getElementById('version-dropdown');
+
+    dropdown.innerHTML = suggestions.map(s => `
+      <div class="suggestion-item" data-version="${esc(s.version)}"
+           style="padding:10px 14px; cursor:pointer; font-size:.9rem; border-bottom:1px solid #f0f0f0;">
+        <strong>${esc(s.version)}</strong>
+        <span style="color:#888; margin-left:8px">${esc(s.label)}</span>
+      </div>`).join('');
+
+    dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('mouseenter', () => item.style.background = '#f0fbf8');
+      item.addEventListener('mouseleave', () => item.style.background = '');
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        input.value = item.dataset.version;
+        dropdown.style.display = 'none';
+        lookup();
+      });
+    });
+
+    input.addEventListener('focus', () => { dropdown.style.display = 'block'; });
+    input.addEventListener('blur',  () => { setTimeout(() => { dropdown.style.display = 'none'; }, 150); });
   }
 
   // ── Semantic version helpers ───────────────────────────────────────────────
