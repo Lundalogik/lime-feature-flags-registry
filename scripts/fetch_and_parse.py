@@ -26,13 +26,6 @@ SOURCE_REPOS = [
         "changelog_path": "CHANGELOG.md",
         "changelog_branch": "main",
     },
-    {
-        "repo": "Lundalogik/limepkg-email",
-        "version_key": "limepkg_email",
-        "label": "limepkg-email",
-        "changelog_path": "CHANGELOG.md",
-        "changelog_branch": "main",
-    },
 ]
 
 REGISTRY_FILE = "registry.json"

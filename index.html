@@ -162,10 +162,6 @@
       <label for="lime-crm-ver">Lime CRM version</label>
       <input type="text" id="lime-crm-ver" placeholder="e.g. 3.29.0" autocomplete="off">
     </div>
-    <div class="input-group">
-      <label for="email-ver">limepkg-email version <small>(optional)</small></label>
-      <input type="text" id="email-ver" placeholder="e.g. 2.4.0" autocomplete="off">
-    </div>
     <button class="btn" onclick="lookup()">Show flags</button>
     <button class="btn-clear" onclick="clearResults()">Clear</button>
   </div>
@@ -257,11 +253,10 @@
     if (!registry) return;
 
     const limeCrmVer = document.getElementById('lime-crm-ver').value.trim();
-    const emailVer   = document.getElementById('email-ver').value.trim();
 
-    if (!limeCrmVer && !emailVer) {
+    if (!limeCrmVer) {
       document.getElementById('results').innerHTML =
-        '<p style="color:#c00;font-size:.9rem">Please enter at least one version number.</p>';
+        '<p style="color:#c00;font-size:.9rem">Please enter a version number.</p>';
       return;
     }
 
@@ -306,7 +301,6 @@
   function clearResults() {
     document.getElementById('results').innerHTML = '';
     document.getElementById('lime-crm-ver').value = '';
-    document.getElementById('email-ver').value = '';
   }
 
   // ── Table builder ──────────────────────────────────────────────────────────
@@ -422,7 +416,7 @@
   }
 
   // ── Keyboard shortcut (Enter triggers lookup) ──────────────────────────────
-  ['lime-crm-ver', 'email-ver'].forEach(id => {
+  ['lime-crm-ver'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
       if (e.key === 'Enter') lookup();
     });
