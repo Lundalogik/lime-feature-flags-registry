@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-05-16 00:48 UTC &nbsp;·&nbsp; 78 flags tracked*
+*Last updated: 2026-05-17 00:53 UTC &nbsp;·&nbsp; 79 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -22,6 +22,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useNotifications` | lime-webclient | lime-crm 2.898.0 | false | — |
 | `useOfficeFilePreview` | lime-webclient | lime-crm 2.1116.0 | false | — |
 | `usePublishFilterSet` | lime-webclient | lime-crm 3.31.0 | false | — |
+| `useRuleVisibility` | lime-webclient | lime-crm 3.34.0 | false | — |
 | `useShowThumbnail` | lime-webclient | lime-crm 2.1119.0 | false | — |
 
 ## Removed flags

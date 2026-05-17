@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-16T00:48:20Z",
+  "generated_at": "2026-05-17T00:53:19Z",
   "sources": [
     "Lundalogik/lime-crm"
   ],
   "suggested_versions": [
     {
-      "version": "3.33.0",
+      "version": "3.34.0",
       "label": "Latest available"
     },
     {
@@ -1560,6 +1560,23 @@
         {
           "event": "added",
           "lime_crm": "3.31.0",
+          "source_package": "lime-webclient"
+        }
+      ]
+    },
+    "useRuleVisibility": {
+      "source_package": "lime-webclient",
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "3.34.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "3.34.0",
           "source_package": "lime-webclient"
         }
       ]
