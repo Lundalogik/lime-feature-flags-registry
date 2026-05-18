@@ -23,9 +23,9 @@ jobs:
 
       - name: Fetch releases and parse feature flags
         env:
-          # READ_TOKEN must be a fine-grained PAT with read-only access to:
-          #   - Lundalogik/lime-crm
-          #   - Lundalogik/limepkg-email
+          # READ_TOKEN must be a fine-grained PAT with read-only Contents access to:
+          #   - Lundalogik/lime-crm      (CHANGELOG.md)
+          #   - Lundalogik/lime-webclient (lime_webclient/__init__.py at every tag)
           # If those repos are public, GITHUB_TOKEN (auto-provided) is enough.
           READ_TOKEN: ${{ secrets.READ_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
