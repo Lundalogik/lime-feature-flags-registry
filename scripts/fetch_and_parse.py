@@ -21,10 +21,20 @@ Strategy
 This approach is 100 % accurate: it reads the actual source code, so
 it never misses a flag regardless of how engineers word their commits.
 
+Incremental runs
+----------------
+On subsequent runs the existing registry.json is used as a cache.
+Only webclient versions newer than `incremental_state.last_processed_webclient_version`
+are fetched, making nightly runs very cheap (typically 0–2 API calls
+instead of ~300).
+
+Pass --force-rebuild to ignore the cache and reprocess everything.
+
 Authentication: set READ_TOKEN (preferred) or GITHUB_TOKEN in the env.
 Without a token you will hit GitHub's 60 req/hour anonymous limit fast.
 """
 
+import argparse
 import ast
 import json
 import os
@@ -37,9 +47,9 @@ from packaging.version import Version
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
-LIME_CRM_REPO     = "Lundalogik/lime-crm"
-WEBCLIENT_REPO    = "Lundalogik/lime-webclient"
-WEBCLIENT_INIT    = "lime_webclient/__init__.py"
+LIME_CRM_REPO  = "Lundalogik/lime-crm"
+WEBCLIENT_REPO = "Lundalogik/lime-webclient"
+WEBCLIENT_INIT = "lime_webclient/__init__.py"
 
 REGISTRY_FILE = "registry.json"
 README_FILE   = "README.md"
@@ -108,7 +118,8 @@ def build_crm_to_webclient_map(changelog: str) -> list[tuple[str, str]]:
     for i, match in enumerate(version_matches):
         crm_ver = match.group(1)
         block_start = match.start()
-        block_end = version_matches[i + 1].start() if i + 1 < len(version_matches) else len(changelog)
+        block_end = (version_matches[i + 1].start()
+                     if i + 1 < len(version_matches) else len(changelog))
         block = changelog[block_start:block_end]
 
         wc_versions = WEBCLIENT_VER_RE.findall(block)
@@ -163,7 +174,6 @@ def parse_features(source: str) -> dict | None:
                 if not isinstance(fk, ast.Constant):
                     continue
                 flag_name = fk.value
-                # Resolve the default to a Python bool/None
                 if isinstance(fv, ast.Constant):
                     result[flag_name] = fv.value
                 elif isinstance(fv, ast.NameConstant):  # Python < 3.8 compat
@@ -173,7 +183,7 @@ def parse_features(source: str) -> dict | None:
                     result[flag_name] = None
             return result
 
-    print("  Warning: DEFAULT_CONFIG[\"features\"] not found in __init__.py",
+    print('  Warning: DEFAULT_CONFIG["features"] not found in __init__.py',
           file=sys.stderr)
     return None
 
@@ -199,62 +209,105 @@ def diff_features(old: dict, new: dict) -> list[dict]:
     return events
 
 
-def build_registry(token: str | None) -> dict:
+# ── Incremental state helpers ─────────────────────────────────────────────────
+
+
+def load_incremental_state(path: str) -> tuple[dict, dict]:
     """
-    Main logic: fetch, diff, and assemble the flags registry.
+    Load existing flags and incremental state from registry.json.
+    Returns ({}, {}) if the file does not exist or has no incremental_state.
+    """
+    if not os.path.exists(path):
+        return {}, {}
+    try:
+        with open(path) as fh:
+            data = json.load(fh)
+        return data.get("flags", {}), data.get("incremental_state", {})
+    except (json.JSONDecodeError, OSError):
+        return {}, {}
+
+
+# ── Core registry builder ─────────────────────────────────────────────────────
+
+
+def build_registry(
+    token: str | None,
+    existing_flags: dict,
+    incremental_state: dict,
+) -> tuple[dict, dict]:
+    """
+    Fetch, diff, and assemble the flags registry incrementally.
+
+    Returns (flags, new_incremental_state).
     """
     # ── Step 1: get the lime-crm CHANGELOG ──
     print(f"Fetching CHANGELOG.md from {LIME_CRM_REPO}…")
     changelog = fetch_file(LIME_CRM_REPO, "CHANGELOG.md", "main", token)
     if not changelog:
         print("  Error: could not fetch CHANGELOG.md.", file=sys.stderr)
-        return {}
+        return existing_flags, incremental_state
 
     crm_to_wc = build_crm_to_webclient_map(changelog)
     print(f"  Found {len(crm_to_wc)} lime-crm versions with webclient mapping.")
 
-    # ── Step 2: fetch unique webclient __init__.py snapshots ──
-    # Build an ordered list of unique webclient versions (oldest → newest)
-    seen_wc: dict[str, str] = {}  # wc_ver → lime_crm_ver (first crm ver to ship it)
+    # ── Step 2: build ordered list of unique webclient versions ──
+    seen_wc: dict[str, str] = {}  # wc_ver → first lime_crm_ver to ship it
     for crm_ver, wc_ver in crm_to_wc:
         if wc_ver not in seen_wc:
             seen_wc[wc_ver] = crm_ver
 
-    unique_wc_versions = list(seen_wc.keys())  # already oldest→newest
-    print(f"  {len(unique_wc_versions)} unique lime-webclient versions to fetch…")
+    unique_wc_versions = list(seen_wc.keys())  # oldest → newest
 
-    snapshots: list[tuple[str, str, dict]] = []  # (wc_ver, crm_ver, features)
+    # ── Step 3: determine what to process (incremental vs full) ──
+    resume_from = incremental_state.get("last_processed_webclient_version")
 
-    for idx, wc_ver in enumerate(unique_wc_versions):
+    if resume_from and resume_from in unique_wc_versions:
+        resume_idx = unique_wc_versions.index(resume_from)
+        versions_to_process = unique_wc_versions[resume_idx + 1:]
+        prev_features: dict = incremental_state.get("features_snapshot", {})
+        print(f"  Resuming from webclient {resume_from} — "
+              f"{len(versions_to_process)} new version(s) to process.")
+    else:
+        versions_to_process = unique_wc_versions
+        prev_features = {}
+        if resume_from:
+            print(f"  Warning: resume point {resume_from} not found in CHANGELOG — "
+                  "doing full rebuild.", file=sys.stderr)
+        else:
+            print(f"  No prior state — full rebuild ({len(versions_to_process)} versions).")
+
+    if not versions_to_process:
+        print("  Registry is already up to date.")
+        return existing_flags, incremental_state
+
+    # ── Step 4: fetch snapshots and diff ──
+    flags = dict(existing_flags)
+    last_successfully_diffed: str | None = None
+    final_prev_features = prev_features
+
+    for idx, wc_ver in enumerate(versions_to_process):
         crm_ver = seen_wc[wc_ver]
         tag = f"v{wc_ver}"
-        print(f"  [{idx + 1}/{len(unique_wc_versions)}] webclient {wc_ver} (lime-crm {crm_ver})…",
+        print(f"  [{idx + 1}/{len(versions_to_process)}] "
+              f"webclient {wc_ver} (lime-crm {crm_ver})…",
               end=" ", flush=True)
+
         source = fetch_file(WEBCLIENT_REPO, WEBCLIENT_INIT, tag, token)
         if source is None:
             print("skipped (fetch failed)")
             continue
+
         features = parse_features(source)
         if features is None:
             print("skipped (parse failed)")
             continue
-        snapshots.append((wc_ver, crm_ver, features))
-        print(f"{len(features)} flags")
 
-    if not snapshots:
-        print("  Error: no snapshots collected.", file=sys.stderr)
-        return {}
-
-    # ── Step 3: diff consecutive snapshots ──
-    flags: dict = {}
-
-    for i, (wc_ver, crm_ver, features) in enumerate(snapshots):
-        old_features = snapshots[i - 1][2] if i > 0 else {}
-        events = diff_features(old_features, features)
+        events = diff_features(prev_features, features)
+        print(f"{len(features)} flags, {len(events)} change(s)")
 
         for ev in events:
-            name = ev["flag"]
-            event = ev["event"]
+            name   = ev["flag"]
+            event  = ev["event"]
             default = ev["default"]
 
             if name not in flags:
@@ -268,8 +321,7 @@ def build_registry(token: str | None) -> dict:
                 }
 
             flag = flags[name]
-            entry: dict = {"event": event, "lime_crm": crm_ver}
-            flag["history"].append(entry)
+            flag["history"].append({"event": event, "lime_crm": crm_ver})
 
             if event == "added":
                 if not flag["added_in"]:
@@ -287,14 +339,29 @@ def build_registry(token: str | None) -> dict:
                 flag["status"] = "removed"
                 flag["current_default"] = None
 
-    # ── Step 4: set current_default from the latest snapshot ──
-    latest_features = snapshots[-1][2]
-    for name, flag in flags.items():
-        if flag["status"] == "active" and name in latest_features:
-            flag["current_default"] = bool(latest_features[name])
+        prev_features = features
+        final_prev_features = features
+        last_successfully_diffed = wc_ver
 
-    print(f"\nDone — {len(flags)} flags total.")
-    return flags
+    # ── Step 5: sync current_default from the very latest snapshot ──
+    for name, flag in flags.items():
+        if flag["status"] == "active" and name in final_prev_features:
+            flag["current_default"] = bool(final_prev_features[name])
+
+    active  = sum(1 for f in flags.values() if f["status"] == "active")
+    removed = sum(1 for f in flags.values() if f["status"] == "removed")
+    print(f"\nDone — {len(flags)} flags total ({active} active, {removed} removed).")
+
+    # ── Step 6: build new incremental state ──
+    if last_successfully_diffed:
+        new_state = {
+            "last_processed_webclient_version": last_successfully_diffed,
+            "features_snapshot": final_prev_features,
+        }
+    else:
+        new_state = incremental_state  # nothing new was processed, carry forward
+
+    return flags, new_state
 
 
 # ── Deployment versions ───────────────────────────────────────────────────────
@@ -323,7 +390,8 @@ def fetch_suggested_versions() -> list[dict]:
         print("  Warning: no table rows found on versions page.", file=sys.stderr)
         return []
 
-    headers = [th.get_text(strip=True).lower() for th in header_row.find_all(["th", "td"])]
+    headers = [th.get_text(strip=True).lower()
+               for th in header_row.find_all(["th", "td"])]
     col_map = {}
     for label, keywords in {
         "Current in cloud": ["current in cloud", "current"],
@@ -352,18 +420,24 @@ def fetch_suggested_versions() -> list[dict]:
         print(f"  Deployment versions: {suggestions}")
         return suggestions
 
-    print(f"  Warning: '{VERSIONS_PACKAGE}' row not found on versions page.", file=sys.stderr)
+    print(f"  Warning: '{VERSIONS_PACKAGE}' row not found on versions page.",
+          file=sys.stderr)
     return []
 
 
 # ── Output generators ─────────────────────────────────────────────────────────
 
 
-def build_registry_json(flags: dict, suggested_versions: list[dict]) -> dict:
+def build_registry_json(
+    flags: dict,
+    suggested_versions: list[dict],
+    incremental_state: dict,
+) -> dict:
     return {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sources": [LIME_CRM_REPO, WEBCLIENT_REPO],
         "suggested_versions": suggested_versions,
+        "incremental_state": incremental_state,
         "flags": flags,
     }
 
@@ -377,7 +451,7 @@ def _ver_display(version_dict: dict) -> str:
 
 
 def build_readme(flags: dict) -> str:
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now    = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     active  = {k: v for k, v in flags.items() if v["status"] == "active"}
     removed = {k: v for k, v in flags.items() if v["status"] == "removed"}
 
@@ -425,7 +499,19 @@ def build_readme(flags: dict) -> str:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Refresh the feature flags registry.")
+    parser.add_argument(
+        "--force-rebuild",
+        action="store_true",
+        help="Ignore cached incremental state and reprocess all historical versions.",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = parse_args()
+
     token = os.environ.get("READ_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if not token:
         print(
@@ -434,12 +520,18 @@ def main() -> None:
             file=sys.stderr,
         )
 
-    flags = build_registry(token)
+    existing_flags, incremental_state = load_incremental_state(REGISTRY_FILE)
+
+    if args.force_rebuild:
+        print("--force-rebuild: ignoring cached state, reprocessing all versions.")
+        existing_flags, incremental_state = {}, {}
+
+    flags, new_incremental_state = build_registry(token, existing_flags, incremental_state)
 
     print("\nFetching deployment versions…")
     suggested_versions = fetch_suggested_versions()
 
-    registry = build_registry_json(flags, suggested_versions)
+    registry = build_registry_json(flags, suggested_versions, new_incremental_state)
     with open(REGISTRY_FILE, "w") as fh:
         json.dump(registry, fh, indent=2)
     print(f"Wrote {REGISTRY_FILE} ({len(flags)} flags)")
