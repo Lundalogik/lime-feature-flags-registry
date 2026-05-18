@@ -1,22 +1,24 @@
 {
-  "generated_at": "2026-05-18T00:54:12Z",
+  "generated_at": "2026-05-18T07:10:28Z",
   "sources": [
-    "Lundalogik/lime-crm"
+    "Lundalogik/lime-crm",
+    "Lundalogik/lime-webclient"
   ],
   "suggested_versions": [
     {
-      "version": "3.34.0",
-      "label": "Latest available"
+      "version": "3.0.11",
+      "label": "Current in cloud"
     },
     {
       "version": "3.30.1",
       "label": "Verification"
     },
     {
-      "version": "3.0.11",
-      "label": "Current in cloud"
+      "version": "3.34.0",
+      "label": "Latest available"
     }
   ],
+  "incremental_state": {},
   "flags": {
     "RemovedInMarshmallow4Warning": {
       "source_package": "lime-webclient",
