@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-05-19 00:57 UTC &nbsp;·&nbsp; 79 flags tracked*
+*Last updated: 2026-05-20 00:58 UTC &nbsp;·&nbsp; 79 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
