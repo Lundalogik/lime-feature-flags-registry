@@ -47,9 +47,13 @@ from packaging.version import Version
 
 # ── Configuration ────────────────────────────────────────────────────────────
 
-LIME_CRM_REPO  = "Lundalogik/lime-crm"
-WEBCLIENT_REPO = "Lundalogik/lime-webclient"
-WEBCLIENT_INIT = "lime_webclient/__init__.py"
+LIME_CRM_REPO        = "Lundalogik/lime-crm"
+WEBCLIENT_REPO       = "Lundalogik/lime-webclient"
+WEBCLIENT_INIT       = "lime_webclient/__init__.py"
+WEBCLIENT_PKGLOCK    = "package-lock.json"
+CRM_COMPONENTS_REPO  = "Lundalogik/lime-crm-components"
+CRM_COMPONENTS_TS    = "src/core/feature-switches.ts"
+CRM_COMPONENTS_PKG   = "@lundalogik/lime-crm-components"
 
 REGISTRY_FILE = "registry.json"
 README_FILE   = "README.md"
@@ -67,6 +71,11 @@ VERSION_HEADER_RE = re.compile(r"^## \[(\d+\.\d+\.\d+)\]", re.MULTILINE)
 
 # "lime-webclient 46.2086.1" anywhere on a line
 WEBCLIENT_VER_RE = re.compile(r"lime-webclient\s+(\d+\.\d+\.\d+)")
+
+# Flag names declared in the TypeScript FeatureSwitches interface
+#   useFoo: boolean;
+#   displayBar: boolean;
+TS_FLAG_RE = re.compile(r"^\s+(\w+):\s*boolean;", re.MULTILINE)
 
 # ── GitHub API helpers ────────────────────────────────────────────────────────
 
@@ -188,6 +197,52 @@ def parse_features(source: str) -> dict | None:
     return None
 
 
+# ── lime-crm-components TypeScript parser ────────────────────────────────────
+
+
+def parse_crm_components_version(pkg_lock_text: str) -> str | None:
+    """
+    Extract the resolved version of @lundalogik/lime-crm-components from
+    lime-webclient's package-lock.json. Returns e.g. "3.477.2" or None.
+    """
+    try:
+        data = json.loads(pkg_lock_text)
+    except json.JSONDecodeError:
+        return None
+    # npm lockfile v2/v3: packages["node_modules/@lundalogik/lime-crm-components"]
+    packages = data.get("packages", {})
+    key = f"node_modules/{CRM_COMPONENTS_PKG}"
+    if key in packages:
+        return packages[key].get("version")
+    # Fallback: dependencies (lockfile v1)
+    deps = data.get("dependencies", {})
+    entry = deps.get(CRM_COMPONENTS_PKG, {})
+    return entry.get("version")
+
+
+def parse_ts_feature_switches(ts_source: str) -> set[str]:
+    """
+    Parse the TypeScript FeatureSwitches interface declaration and return
+    the set of flag names declared in it.
+    """
+    return set(TS_FLAG_RE.findall(ts_source))
+
+
+def merge_features(
+    python_features: dict,
+    ts_flags: set[str],
+) -> dict:
+    """
+    Merge Python defaults with TypeScript-declared flags.
+    Python defaults take precedence; TS-only flags get default False.
+    """
+    merged = dict(python_features)
+    for flag in ts_flags:
+        if flag not in merged:
+            merged[flag] = False
+    return merged
+
+
 # ── Core diffing logic ────────────────────────────────────────────────────────
 
 
@@ -285,6 +340,11 @@ def build_registry(
     last_successfully_diffed: str | None = None
     final_prev_features = prev_features
 
+    # Cache: crm-components version → set of TS flag names (avoids re-fetching
+    # the same crm-components version across many consecutive webclient versions)
+    ts_flags_cache: dict[str, set[str]] = {}
+    prev_crm_components_ver: str | None = None
+
     for idx, wc_ver in enumerate(versions_to_process):
         crm_ver = seen_wc[wc_ver]
         tag = f"v{wc_ver}"
@@ -297,13 +357,31 @@ def build_registry(
             print("skipped (fetch failed)")
             continue
 
-        features = parse_features(source)
-        if features is None:
+        python_features = parse_features(source)
+        if python_features is None:
             print("skipped (parse failed)")
             continue
 
+        # Resolve lime-crm-components TS flags for this webclient version
+        ts_flags: set[str] = set()
+        pkg_lock_text = fetch_file(WEBCLIENT_REPO, WEBCLIENT_PKGLOCK, tag, token)
+        if pkg_lock_text:
+            crc_ver = parse_crm_components_version(pkg_lock_text)
+            if crc_ver and crc_ver not in ts_flags_cache:
+                ts_source = fetch_file(
+                    CRM_COMPONENTS_REPO, CRM_COMPONENTS_TS, f"v{crc_ver}", token
+                )
+                if ts_source:
+                    ts_flags_cache[crc_ver] = parse_ts_feature_switches(ts_source)
+                    prev_crm_components_ver = crc_ver
+            if crc_ver:
+                ts_flags = ts_flags_cache.get(crc_ver, set())
+
+        features = merge_features(python_features, ts_flags)
         events = diff_features(prev_features, features)
-        print(f"{len(features)} flags, {len(events)} change(s)")
+        print(f"{len(features)} flags ({len(python_features)} py + "
+              f"{len(ts_flags) - len(python_features & ts_flags)} ts-only), "
+              f"{len(events)} change(s)")
 
         for ev in events:
             name   = ev["flag"]
