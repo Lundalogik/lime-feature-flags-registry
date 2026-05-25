@@ -379,9 +379,9 @@ def build_registry(
 
         features = merge_features(python_features, ts_flags)
         events = diff_features(prev_features, features)
+        ts_only_count = len(ts_flags - set(python_features))
         print(f"{len(features)} flags ({len(python_features)} py + "
-              f"{len(ts_flags) - len(python_features & ts_flags)} ts-only), "
-              f"{len(events)} change(s)")
+              f"{ts_only_count} ts-only), {len(events)} change(s)")
 
         for ev in events:
             name   = ev["flag"]
