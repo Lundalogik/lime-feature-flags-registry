@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-29T00:58:45Z",
+  "generated_at": "2026-05-30T00:54:24Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/lime-webclient"
@@ -14,7 +14,7 @@
       "label": "Verification"
     },
     {
-      "version": "3.42.0",
+      "version": "3.43.0",
       "label": "Latest available"
     }
   ],
