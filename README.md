@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-06-01 01:02 UTC &nbsp;·&nbsp; 120 flags tracked*
+*Last updated: 2026-06-02 01:01 UTC &nbsp;·&nbsp; 121 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -22,6 +22,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useAssign` | lime-crm 2.965.0 | true | lime-crm 2.1036.1 |
 | `useCheckFileContentMatchesExtension` | lime-crm 2.1133.0 | false | — |
 | `useClientRequestCache` | lime-crm 2.766.1 | false | — |
+| `useDeferredTotals` | lime-crm 3.44.0 | false | — |
 | `useFollowObject` | lime-crm 2.980.0 | true | lime-crm 2.1036.1 |
 | `useGlobalAiChat` | lime-crm 2.1178.1 | false | — |
 | `useHasmanyAggregates` | lime-crm 2.766.1 | true | — |
