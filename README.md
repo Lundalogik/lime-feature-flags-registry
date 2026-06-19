@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-06-18 01:02 UTC &nbsp;·&nbsp; 122 flags tracked*
+*Last updated: 2026-06-19 01:08 UTC &nbsp;·&nbsp; 123 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -26,6 +26,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useDeferredTotals` | lime-crm 3.44.0 | false | — |
 | `useFollowObject` | lime-crm 2.980.0 | true | lime-crm 2.1036.1 |
 | `useGlobalAiChat` | lime-crm 2.1178.1 | false | — |
+| `useGlobalAiChatFunctionTools` | lime-crm 3.60.0 | false | — |
 | `useHasmanyAggregates` | lime-crm 2.766.1 | true | — |
 | `useIdDefaultSortOrder` | — | true | lime-crm 2.829.0 |
 | `useIdDefaultSorting` | lime-crm 2.802.0 | true | lime-crm 2.829.0 |
