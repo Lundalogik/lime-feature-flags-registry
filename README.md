@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-07-27 00:43 UTC &nbsp;·&nbsp; 124 flags tracked*
+*Last updated: 2026-07-28 00:38 UTC &nbsp;·&nbsp; 124 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -35,7 +35,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useLimeQueryBuilderGuiMode` | lime-crm 2.1169.0 | true | — |
 | `useMcpServer` | lime-crm 3.34.0 | false | — |
 | `useMinimizeButton` | lime-crm 2.766.1 | false | — |
-| `useNestedTabRelations` | lime-crm 2.1237.0 | false | — |
+| `useNestedTabRelations` | lime-crm 2.1237.0 | true | lime-crm 3.84.0 |
 | `useNewAdmin` | lime-crm 2.811.0 | false | — |
 | `useNewInfoTiles` | lime-crm 2.895.0 | true | lime-crm 2.929.0 |
 | `useNewQuickFilter` | lime-crm 2.1153.0 | false | — |
