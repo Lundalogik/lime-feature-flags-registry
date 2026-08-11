@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T00:23:23Z",
+  "generated_at": "2026-08-11T00:22:22Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/lime-webclient"
@@ -15,7 +15,7 @@
     }
   ],
   "incremental_state": {
-    "last_processed_webclient_version": "46.2141.6",
+    "last_processed_webclient_version": "46.2141.7",
     "features_snapshot": {
       "disable_salespipe": false,
       "useHasmanyAggregates": true,
@@ -44,15 +44,15 @@
       "useRuleVisibility": false,
       "useSecondarySidepanel": true,
       "useNestedTabRelations": true,
-      "manyToManyRelations": false,
       "useProblemCenter": false,
-      "displayAiChatButtonInDock": false,
+      "useGlobalAiChatFunctionTools": false,
       "useCheckFileContentMatchesExtension": false,
       "useAiPromptCaching": false,
-      "useDeferredTotals": false,
-      "useGlobalAiChatFunctionTools": false,
       "useLimeMarketing": false,
-      "useShareFiles": false
+      "displayAiChatButtonInDock": false,
+      "useShareFiles": false,
+      "useDeferredTotals": false,
+      "manyToManyRelations": false
     }
   },
   "flags": {
