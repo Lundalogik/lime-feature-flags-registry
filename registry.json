@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T00:16:42Z",
+  "generated_at": "2026-08-27T01:40:23Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/lime-webclient"
@@ -15,7 +15,7 @@
     }
   ],
   "incremental_state": {
-    "last_processed_webclient_version": "46.2147.2",
+    "last_processed_webclient_version": "46.2149.1",
     "features_snapshot": {
       "disable_salespipe": false,
       "useHasmanyAggregates": true,
@@ -31,7 +31,6 @@
       "useFollowObject": true,
       "useRedisConfigCache": true,
       "useNewQuickFilter": true,
-      "useAiChat": false,
       "useGlobalAiChat": false,
       "useAiChatSessions": false,
       "useAi": true,
@@ -42,17 +41,15 @@
       "useMcpServer": false,
       "usePublishFilterSet": false,
       "useRuleVisibility": false,
-      "useSecondarySidepanel": true,
       "useNestedTabRelations": true,
-      "useCheckFileContentMatchesExtension": false,
       "useAiPromptCaching": false,
-      "useDeferredTotals": false,
-      "displayAiChatButtonInDock": false,
-      "manyToManyRelations": false,
+      "useCheckFileContentMatchesExtension": false,
       "useProblemCenter": false,
-      "useShareFiles": false,
       "useGlobalAiChatFunctionTools": false,
-      "useLimeMarketing": false
+      "useDeferredTotals": false,
+      "useShareFiles": false,
+      "useLimeMarketing": false,
+      "manyToManyRelations": false
     }
   },
   "flags": {
@@ -2492,17 +2489,23 @@
       ]
     },
     "useAiChat": {
-      "status": "active",
-      "current_default": false,
+      "status": "removed",
+      "current_default": null,
       "added_in": {
         "lime_crm": "2.1036.1"
       },
       "default_true_since": {},
-      "removed_in": {},
+      "removed_in": {
+        "lime_crm": "3.96.0"
+      },
       "history": [
         {
           "event": "added",
           "lime_crm": "2.1036.1"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "3.96.0"
         }
       ]
     },
@@ -2649,17 +2652,23 @@
       ]
     },
     "displayAiChatButtonInDock": {
-      "status": "active",
-      "current_default": false,
+      "status": "removed",
+      "current_default": null,
       "added_in": {
         "lime_crm": "2.1219.0"
       },
       "default_true_since": {},
-      "removed_in": {},
+      "removed_in": {
+        "lime_crm": "3.96.0"
+      },
       "history": [
         {
           "event": "added",
           "lime_crm": "2.1219.0"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "3.96.0"
         }
       ]
     },
@@ -2679,15 +2688,17 @@
       ]
     },
     "useSecondarySidepanel": {
-      "status": "active",
-      "current_default": true,
+      "status": "removed",
+      "current_default": null,
       "added_in": {
         "lime_crm": "3.16.0"
       },
       "default_true_since": {
         "lime_crm": "3.38.0"
       },
-      "removed_in": {},
+      "removed_in": {
+        "lime_crm": "3.96.0"
+      },
       "history": [
         {
           "event": "added",
@@ -2696,6 +2707,10 @@
         {
           "event": "default_changed_to_true",
           "lime_crm": "3.38.0"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "3.96.0"
         }
       ]
     },

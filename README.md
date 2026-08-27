@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-08-26 00:16 UTC &nbsp;·&nbsp; 124 flags tracked*
+*Last updated: 2026-08-27 01:40 UTC &nbsp;·&nbsp; 124 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -11,13 +11,11 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | Flag | Added in | Default | Default → true in |
 |------|----------|:-------:|-------------------|
 | `disable_salespipe` | lime-crm 2.4.1 | false | — |
-| `displayAiChatButtonInDock` | lime-crm 2.1219.0 | false | — |
 | `limepkgEmailEnableMessageIdIdentification` | lime-crm 2.1216.0 | true | lime-crm 2.1216.0 |
 | `manyToManyRelations` | lime-crm 2.812.0 | false | — |
 | `useActivitityFileUploads` | — | true | lime-crm 2.842.0 |
 | `useActivityFileUploads` | lime-crm 2.800.0 | true | lime-crm 2.842.0 |
 | `useAi` | lime-crm 2.1167.0 | true | — |
-| `useAiChat` | lime-crm 2.1036.1 | false | — |
 | `useAiChatDevMode` | lime-crm 3.8.0 | false | — |
 | `useAiChatSessions` | lime-crm 3.63.0 | false | — |
 | `useAiPromptCaching` | lime-crm 3.45.0 | false | — |
@@ -45,7 +43,6 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `usePublishFilterSet` | lime-crm 3.31.0 | false | — |
 | `useRedisConfigCache` | lime-crm 2.994.0 | true | lime-crm 2.1036.1 |
 | `useRuleVisibility` | lime-crm 3.34.0 | false | — |
-| `useSecondarySidepanel` | lime-crm 3.16.0 | true | lime-crm 3.38.0 |
 
 ## Removed flags
 
@@ -66,6 +63,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `disable_dashboard_slot` | lime-crm 2.4.1 | lime-crm 2.766.1 |
 | `disable_todo_widget` | lime-crm 2.4.1 | lime-crm 2.766.1 |
 | `disabled` | — | lime-crm 2.780.0 |
+| `displayAiChatButtonInDock` | lime-crm 2.1219.0 | lime-crm 3.96.0 |
 | `emptyStateMessage` | — | lime-crm 2.910.0 |
 | `enable_lime_admin2` | lime-crm 2.8.1 | lime-crm 2.766.1 |
 | `enable_start_page_grid` | lime-crm 2.4.1 | lime-crm 2.766.1 |
@@ -102,6 +100,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `sys_notification` | — | lime-crm 2.915.0 |
 | `transaction_id` | — | lime-crm 2.1195.0 |
 | `type` | — | lime-crm 2.1097.0 |
+| `useAiChat` | lime-crm 2.1036.1 | lime-crm 3.96.0 |
 | `useBowser` | lime-crm 2.844.0 | lime-crm 3.29.0 |
 | `useBowserMenu` | — | lime-crm 2.974.0 |
 | `useChangeLog` | lime-crm 2.1014.0 | lime-crm 2.1088.0 |
@@ -128,6 +127,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useRecentlyDeleted` | lime-crm 2.976.0 | lime-crm 2.1004.0 |
 | `useRedesign` | lime-crm 2.84.1 | lime-crm 2.93.1 |
 | `useRelatedData` | lime-crm 2.197.1 | lime-crm 2.766.1 |
+| `useSecondarySidepanel` | lime-crm 3.16.0 | lime-crm 3.96.0 |
 | `useShareFiles` | lime-crm 2.1076.1 | lime-crm 2.1195.0 |
 | `useShareLimeObject` | lime-crm 2.1082.0 | lime-crm 2.1195.0 |
 | `useShowThumbnail` | lime-crm 2.1119.0 | lime-crm 3.30.0 |
