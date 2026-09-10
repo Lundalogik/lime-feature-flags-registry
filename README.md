@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-09-09 00:36 UTC &nbsp;·&nbsp; 124 flags tracked*
+*Last updated: 2026-09-10 00:34 UTC &nbsp;·&nbsp; 124 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -17,7 +17,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useActivityFileUploads` | lime-crm 2.800.0 | true | lime-crm 2.842.0 |
 | `useAi` | lime-crm 2.1167.0 | true | — |
 | `useAiChatDevMode` | lime-crm 3.8.0 | false | — |
-| `useAiChatSessions` | lime-crm 3.63.0 | false | — |
+| `useAiChatSessions` | lime-crm 3.63.0 | true | lime-crm 3.107.0 |
 | `useAiPromptCaching` | lime-crm 3.45.0 | false | — |
 | `useAssign` | lime-crm 2.965.0 | true | lime-crm 2.1036.1 |
 | `useCheckFileContentMatchesExtension` | lime-crm 2.1133.0 | false | — |
