@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T00:35:06Z",
+  "generated_at": "2026-09-19T00:34:50Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/lime-webclient"
@@ -15,14 +15,13 @@
     }
   ],
   "incremental_state": {
-    "last_processed_webclient_version": "46.2167.0",
+    "last_processed_webclient_version": "46.2168.0",
     "features_snapshot": {
       "disable_salespipe": false,
       "useHasmanyAggregates": true,
       "useClientRequestCache": false,
       "useMinimizeButton": false,
       "useActivityFileUploads": true,
-      "useIdDefaultSorting": true,
       "useNewAdmin": false,
       "useDynamicStaticFiles": true,
       "useNewInfoTiles": true,
@@ -43,13 +42,13 @@
       "usePublishFilterSet": false,
       "useRuleVisibility": false,
       "useNestedTabRelations": true,
-      "useDeferredTotals": false,
-      "manyToManyRelations": false,
-      "useLimeMarketing": false,
-      "useCheckFileContentMatchesExtension": false,
-      "useProblemCenter": false,
+      "useGlobalAiChatFunctionTools": false,
       "useShareFiles": false,
-      "useGlobalAiChatFunctionTools": false
+      "useDeferredTotals": false,
+      "useLimeMarketing": false,
+      "useProblemCenter": false,
+      "useCheckFileContentMatchesExtension": false,
+      "manyToManyRelations": false
     }
   },
   "flags": {
@@ -2306,15 +2305,17 @@
       ]
     },
     "useIdDefaultSorting": {
-      "status": "active",
-      "current_default": true,
+      "status": "removed",
+      "current_default": null,
       "added_in": {
         "lime_crm": "2.802.0"
       },
       "default_true_since": {
         "lime_crm": "2.829.0"
       },
-      "removed_in": {},
+      "removed_in": {
+        "lime_crm": "3.113.0"
+      },
       "history": [
         {
           "event": "added",
@@ -2323,6 +2324,10 @@
         {
           "event": "default_changed_to_true",
           "lime_crm": "2.829.0"
+        },
+        {
+          "event": "removed",
+          "lime_crm": "3.113.0"
         }
       ]
     },

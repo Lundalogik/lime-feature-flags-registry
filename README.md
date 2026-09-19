@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-09-18 00:35 UTC &nbsp;·&nbsp; 124 flags tracked*
+*Last updated: 2026-09-19 00:34 UTC &nbsp;·&nbsp; 124 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -28,7 +28,6 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useGlobalAiChatFunctionTools` | lime-crm 3.60.0 | false | — |
 | `useHasmanyAggregates` | lime-crm 2.766.1 | true | — |
 | `useIdDefaultSortOrder` | — | true | lime-crm 2.829.0 |
-| `useIdDefaultSorting` | lime-crm 2.802.0 | true | lime-crm 2.829.0 |
 | `useLimeMarketing` | lime-crm 2.1127.0 | false | — |
 | `useLimeQueryBuilderGuiMode` | lime-crm 2.1169.0 | true | — |
 | `useMcpServer` | lime-crm 3.34.0 | false | — |
@@ -111,6 +110,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useFeed` | lime-crm 2.766.1 | lime-crm 2.1018.0 |
 | `useFileViewer` | lime-crm 2.766.1 | lime-crm 2.1117.0 |
 | `useHotkeys` | lime-crm 2.259.1 | lime-crm 2.766.1 |
+| `useIdDefaultSorting` | lime-crm 2.802.0 | lime-crm 3.113.0 |
 | `useJeopardyFilter` | lime-crm 2.1016.0 | lime-crm 3.24.0 |
 | `useLayouts` | lime-crm 2.857.0 | lime-crm 2.1192.0 |
 | `useLimeAdminForEntraID` | lime-crm 2.898.0 | lime-crm 2.1014.0 |
