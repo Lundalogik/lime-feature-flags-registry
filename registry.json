@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T00:38:50Z",
+  "generated_at": "2026-09-22T00:35:40Z",
   "sources": [
     "Lundalogik/lime-crm",
     "Lundalogik/lime-webclient"
@@ -15,7 +15,7 @@
     }
   ],
   "incremental_state": {
-    "last_processed_webclient_version": "46.2169.0",
+    "last_processed_webclient_version": "46.2170.0",
     "features_snapshot": {
       "disable_salespipe": false,
       "useHasmanyAggregates": true,
@@ -31,6 +31,7 @@
       "useRedisConfigCache": true,
       "useNewQuickFilter": true,
       "useGlobalAiChat": false,
+      "useGlobalAiChatFeedback": false,
       "useAiChatSessions": true,
       "useAiPromptCaching": true,
       "useAi": true,
@@ -42,12 +43,12 @@
       "usePublishFilterSet": false,
       "useRuleVisibility": false,
       "useNestedTabRelations": true,
-      "useLimeMarketing": false,
-      "useGlobalAiChatFunctionTools": false,
+      "manyToManyRelations": false,
       "useDeferredTotals": false,
       "useCheckFileContentMatchesExtension": false,
-      "manyToManyRelations": false,
       "useShareFiles": false,
+      "useGlobalAiChatFunctionTools": false,
+      "useLimeMarketing": false,
       "useProblemCenter": false
     }
   },
@@ -2803,6 +2804,21 @@
         {
           "event": "default_changed_to_true",
           "lime_crm": "3.107.0"
+        }
+      ]
+    },
+    "useGlobalAiChatFeedback": {
+      "status": "active",
+      "current_default": false,
+      "added_in": {
+        "lime_crm": "3.116.0"
+      },
+      "default_true_since": {},
+      "removed_in": {},
+      "history": [
+        {
+          "event": "added",
+          "lime_crm": "3.116.0"
         }
       ]
     }
