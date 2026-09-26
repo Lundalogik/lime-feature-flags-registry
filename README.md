@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-09-25 00:35 UTC &nbsp;·&nbsp; 125 flags tracked*
+*Last updated: 2026-09-26 00:34 UTC &nbsp;·&nbsp; 126 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -43,6 +43,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `usePublishFilterSet` | lime-crm 3.31.0 | false | — |
 | `useRedisConfigCache` | lime-crm 2.994.0 | true | lime-crm 2.1036.1 |
 | `useRuleVisibility` | lime-crm 3.34.0 | false | — |
+| `useTodoActivitiesRelatedHistory` | lime-crm 3.118.0 | false | — |
 
 ## Removed flags
 
