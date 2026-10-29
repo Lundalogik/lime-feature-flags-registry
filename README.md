@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-10-28 00:26 UTC &nbsp;·&nbsp; 127 flags tracked*
+*Last updated: 2026-10-29 00:26 UTC &nbsp;·&nbsp; 128 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -38,6 +38,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useNewGlobalAiChat` | lime-crm 3.131.0 | false | — |
 | `useNewInfoTiles` | lime-crm 2.895.0 | true | lime-crm 2.929.0 |
 | `useNewQuickFilter` | lime-crm 2.1153.0 | true | lime-crm 3.94.0 |
+| `useNotificationBundles` | lime-crm 3.140.0 | false | — |
 | `useNotifications` | lime-crm 2.898.0 | true | lime-crm 2.1036.1 |
 | `useOfficeFilePreview` | lime-crm 2.1116.0 | true | lime-crm 2.1188.0 |
 | `useProblemCenter` | lime-crm 2.1209.0 | false | — |
