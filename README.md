@@ -1,6 +1,6 @@
 # Lime Feature Flags Registry
 
-*Last updated: 2026-11-12 00:22 UTC &nbsp;·&nbsp; 128 flags tracked*
+*Last updated: 2026-11-13 00:22 UTC &nbsp;·&nbsp; 128 flags tracked*
 
 Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-registry/)** to see exactly which flags apply to your installation.
 
@@ -42,7 +42,7 @@ Use the **[version lookup tool](https://lundalogik.github.io/lime-feature-flags-
 | `useNotifications` | lime-crm 2.898.0 | true | lime-crm 2.1036.1 |
 | `useOfficeFilePreview` | lime-crm 2.1116.0 | true | lime-crm 2.1188.0 |
 | `useProblemCenter` | lime-crm 2.1209.0 | false | — |
-| `usePublishFilterSet` | lime-crm 3.31.0 | false | — |
+| `usePublishFilterSet` | lime-crm 3.31.0 | true | lime-crm 3.155.0 |
 | `useRedisConfigCache` | lime-crm 2.994.0 | true | lime-crm 2.1036.1 |
 | `useRuleVisibility` | lime-crm 3.34.0 | false | — |
 | `useTodoActivitiesRelatedHistory` | lime-crm 3.118.0 | false | — |
